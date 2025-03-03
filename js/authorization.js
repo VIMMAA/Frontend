@@ -24,7 +24,7 @@ function updateNavbar() {
 updateNavbar();
 
 document.querySelector('button.btn-secondary').addEventListener('click', function () {
-    // window.location.href = 'registration.html';
+    window.location.href = 'registration.html';
 });
 
 document.querySelector('form').addEventListener('submit', function (event) {
@@ -49,7 +49,7 @@ document.querySelector('form').addEventListener('submit', function (event) {
             email: email,
         };
 
-        fetch('', {
+        fetch('', { // взаимодействие с API
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ document.querySelector('form').addEventListener('submit', function (event) {
                     localStorage.setItem('jwtToken', data.token);
                     localStorage.setItem('userEmail', email);
                     localStorage.setItem('userRole');
-                    // window.location.href = 'main.html';
+                    // window.location.href = 'main.html'; добавить переход на главную страницу в зависимости от роли
                 }
             })
             .catch(error => {

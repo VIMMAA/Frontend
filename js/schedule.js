@@ -36,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput');
     const fileList = document.getElementById('fileList');
 
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'txt', 'pdf', 'doc', 'docx'];
+
     fileInput.addEventListener('change', () => {
         const files = fileInput.files;
 
@@ -43,6 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+
+            if (!allowedExtensions.includes(fileExtension)) {
+                alert(`Файл "${file.name}" имеет недопустимый формат!`);
+                continue;
+            }
+
             const li = document.createElement('li');
             li.className = 'list-group-item d-flex justify-content-between align-items-center bg-secondary text-white';
             li.innerHTML = `

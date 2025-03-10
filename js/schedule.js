@@ -31,3 +31,34 @@ function highlightCells(firstCell, lastCell) {
         }
     });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+
+    fileInput.addEventListener('change', () => {
+        const files = fileInput.files;
+
+        if (files.length === 0) return;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center bg-secondary text-white';
+            li.innerHTML = `
+                <span>${file.name}</span>
+                <button class="btn btn-danger btn-sm delete-file">Удалить</button>
+            `;
+            fileList.appendChild(li);
+        }
+
+        fileInput.value = '';
+    });
+
+    fileList.addEventListener('click', (event) => {
+        if (event.target.classList.contains('delete-file')) {
+            const li = event.target.closest('li');
+            fileList.removeChild(li);
+        }
+    });
+});

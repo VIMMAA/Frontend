@@ -139,6 +139,21 @@
                 </tr>
             </tbody>
         </table>
+
+        <div class="mt-5 mb-5 p-4 border border-primary rounded bg-dark text-white">
+            <h2>Прикреплённые файлы</h2>
+            <ul id="fileList" class="list-group mb-3">
+            </ul>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input type="file" class="form-control" id="fileInput" name="files[]" multiple>
+                </div>
+            </form>
+            <button id="uploadButton" class="btn btn-primary mt-2">Загрузить файл</button>
+        </div>
+        
+        
+        
     </main>
 
     <footer>

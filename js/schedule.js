@@ -1,3 +1,5 @@
+
+//необходимо грамотно для расписания переменные подсчитать потом
 let tempCells = document.querySelectorAll("td");
 let cells = Array.from(tempCells);
 
@@ -71,3 +73,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+function generateCalendar(year, month) {
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const calendarBody = document.getElementById('calendarBody');
+    calendarBody.innerHTML = '';
+
+    let date = 1;
+    for (let i = 0; i < 6; i++) { 
+        let row = document.createElement('tr');
+        
+        for (let j = 0; j < 7; j++) {
+            let cell = document.createElement('td');
+            
+            if (i === 0 && j < (firstDay === 0 ? 6 : firstDay - 1)) {
+                cell.innerHTML = '';
+            } else if (date > daysInMonth) {
+                cell.innerHTML = '';
+            } else {
+                cell.innerHTML = date;
+                date++;
+            }
+            
+            row.appendChild(cell);
+        }
+        
+        calendarBody.appendChild(row);
+        
+        if (date > daysInMonth) {
+            break;
+        }
+    }
+}   
+
+generateCalendar(2025, 1);

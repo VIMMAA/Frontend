@@ -9,7 +9,16 @@
     <style>
     .selected {
       background-color: rgba(0, 123, 255, 0.5) !important;
-     }
+    }
+
+    table {
+            width: 100%;
+    }
+    
+    th, td {
+            text-align: center;
+            padding: 10px;
+    }
     </style>
 </head>
 
@@ -63,8 +72,23 @@
             </div>
         </div>
         
+        <table class="table table-bordered border-primary text-white">
+            <thead>
+                <tr>
+                    <th>Пн</th>
+                    <th>Вт</th>
+                    <th>Ср</th>
+                    <th>Чт</th>
+                    <th>Пт</th>
+                    <th>Сб</th>
+                    <th>Вс</th>
+                </tr>
+            </thead>
+            <tbody id="calendarBody">
+            </tbody>
+        </table>
 
-        <table class="table table-bordered border-primary text-center">
+        <table class="table table-bordered border-primary text-center selected d-none">
             <thead class="">
                 <tr>
                     <th></th>

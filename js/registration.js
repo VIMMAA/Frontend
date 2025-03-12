@@ -100,7 +100,7 @@ document.getElementById('registrationForm').addEventListener('submit', function(
             birthDate: birthDate,
         };
         
-        fetch('', {  // взаимодействие с API
+        fetch('', {  // добавить взаимодействие с API
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

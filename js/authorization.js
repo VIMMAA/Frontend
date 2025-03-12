@@ -3,7 +3,12 @@ const token = localStorage.getItem('jwtToken');
 const userRole = localStorage.getItem('userRole');
 
 if (token) {
-    // window.location.href = 'пропуски.html';
+    if (userRole === "Teacher") {
+        window.location.href = 'users.html';
+    }
+    else {
+        window.location.href = 'applicationsList.html';
+    }
 }
 
 const authElements = document.querySelectorAll('.auth-only');
@@ -66,8 +71,15 @@ document.querySelector('form').addEventListener('submit', function (event) {
                 if (data.token) {
                     localStorage.setItem('jwtToken', data.token);
                     localStorage.setItem('userEmail', email);
-                    localStorage.setItem('userRole');
-                    // window.location.href = 'main.html'; добавить переход на главную страницу в зависимости от роли
+                    localStorage.setItem('userRole', data.role)
+    
+                    if (data.role === "Teacher") {
+                        window.location.href = 'users.html';
+                    }
+                    else {
+                        window.location.href = 'applicationsList.html';
+                    }
+                    
                 }
             })
             .catch(error => {

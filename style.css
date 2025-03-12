@@ -39,3 +39,22 @@ html, body {
     margin-bottom: 0;
     padding-bottom: 0;
   }
+
+.acceptButton,
+.rejectButton {
+  transform: translateY(13px);
+  width: 120px
+}
+
+.acceptedApplication,
+.rejectedApplication,
+.reviewApplication {
+  transform: translateY(13px);
+  width: 140px;
+  border-radius: 20px;
+}
+
+.editApplication {
+  transform: translateY(13px);
+  border-radius: 20px;
+}

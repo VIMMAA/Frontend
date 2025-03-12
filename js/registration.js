@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', function () {
 document.getElementById('registrationForm').addEventListener('submit', function(event){
     event.preventDefault();
 
-    const middleName = document.getElementById('inputMiddleName').value;
     const firstName = document.getElementById('inputFirstName').value;
+    const middleName = document.getElementById('inputMiddleName').value;
     const lastName = document.getElementById('inputLastName').value;
     const password = document.getElementById('inputPassword').value;
     const email = document.getElementById('inputEmail').value;
@@ -32,20 +32,20 @@ document.getElementById('registrationForm').addEventListener('submit', function(
 
     let isValid = true;
 
-    if (!middleName){
-        isValid = false;
-        setInvalid('inputMiddleName', 'middleNameFeedback', 'Пожалуйста, введите фамилию.')
-    }
-    else {
-        setValid('inputMiddleName');
-    }
-
     if (!firstName){
         isValid = false;
         setInvalid('inputFirstName', 'firstNameFeedback', 'Пожалуйста, введите имя.')
     }
     else {
         setValid('inputFirstName');
+    }
+
+    if (!middleName){
+        isValid = false;
+        setInvalid('inputMiddleName', 'middleNameFeedback', 'Пожалуйста, введите фамилию.')
+    }
+    else {
+        setValid('inputMiddleName');
     }
 
     if (!lastName){
@@ -92,7 +92,9 @@ document.getElementById('registrationForm').addEventListener('submit', function(
 
     if (isValid){
         const data = {
-            //добавить данные, когда появится API
+            firstName: firstName,
+            middleName: middleName,
+            lastName: lastName,
             password: password,
             email: email,
             birthDate: birthDate,
@@ -115,8 +117,16 @@ document.getElementById('registrationForm').addEventListener('submit', function(
             if (data.token) {
                 localStorage.setItem('jwtToken', data.token);
                 localStorage.setItem('userEmail', email);
+                localStorage.setItem('userRole', data.role)
                 alert('Регистрация прошла успешно!');
-                //window.location.href = 'main.html';  добавить переход на главную страницу
+
+                if (data.role === "Teacher") {
+                    window.location.href = 'users.html';
+                }
+                else {
+                    window.location.href = 'applicationsList.html';
+                }
+                
             }
         })
         .catch(error => {

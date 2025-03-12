@@ -46,36 +46,40 @@
         </nav>
     </header>
     <main>
-        <div class="container mt-5" id="applicationContainer">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="mt-3 mb-0">Список заявок</h1>
-                <button type="button" class="mt-4 btn btn-primary btn-lg" id="createAppliacationButton">
-                    <i class="fa-regular fa-plus"></i>
-                </button>
-            </div>
-        
-            <div class="card shadow-sm p-3 text-light border-secondary" style="background-color: #313538;">
+        <div class="container mt-5">
+            <div id="applicationContainer"></div>
 
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <span class="fs-5">Заявка №<span class="applicationNum">1</span></span>
-                    </div>
-                    <div class="d-flex gap-2 align-items-center">
-                        <button type="button" class="btn btn-success acceptButton d-none">Принять</button>
-                        <button type="button" class="btn btn-danger rejectButton d-none">Отклонить</button>
-                    </div>
-
-                    <div class="d-flex gap-2 align-items-center">
-                        <button type="button" class="btn btn-success acceptedApplication d-none">Одобрена</button>
-                        <button type="button" class="btn btn-danger rejectedApplication d-none">Отклонена</button>
-                        
-                        <button type="button" class="btn btn-warning editApplication"><i class="fa-solid fa-pen"></i></button>
-                        <button type="button" class="btn btn-warning reviewApplication">На проверке</button>
-                    </div>
+            <template id="applicationTemplate">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="mt-3 mb-0">Список заявок</h1>
+                    <button type="button" class="mt-4 btn btn-primary btn-lg createAppliacationButton d-none">
+                        <i class="fa-regular fa-plus"></i>
+                    </button>
                 </div>
-        
-                <span class="mt-1 d-block">Дата подачи: <span class="applicationDate">08.03.2025</span></span>
-            </div>
+            
+                <div class="card shadow-sm p-3 text-light border-secondary" style="background-color: #313538;">
+    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <span class="fs-5">Заявка №<span class="applicationNum">1</span></span>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center makeDecision d-none">
+                            <button type="button" class="btn btn-success acceptButton d-none">Принять</button>
+                            <button type="button" class="btn btn-danger rejectButton d-none">Отклонить</button>
+                        </div>
+    
+                        <div class="d-flex gap-2 align-items-center applicationStatus d-none">
+                            <button type="button" class="btn btn-success acceptedApplication d-none">Одобрена</button>
+                            <button type="button" class="btn btn-danger rejectedApplication d-none">Отклонена</button>
+                            
+                            <button type="button" class="btn btn-warning editApplication d-none"><i class="fa-solid fa-pen"></i></button>
+                            <button type="button" class="btn btn-warning reviewApplication d-none">На проверке</button>
+                        </div>
+                    </div>
+            
+                    <span class="mt-1 d-block">Дата подачи: <span class="applicationDate">08.03.2025</span></span>
+                </div>
+            </template>
         </div>
     </main>
     <footer>

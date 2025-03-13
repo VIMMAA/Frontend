@@ -58,25 +58,23 @@ function updateNavbar() {
 updateNavbar();
 
 function renderApplications(app) {
-    const createAppliacationButton = document.querySelector('.createAppliacationButton');
-    const applicationNum = document.querySelector('.applicationNum');
-
-    const makeDecision = document.querySelector('.makeDecision');
-    const acceptButton = document.querySelector('.acceptButton');
-    const rejectButton = document.querySelector('.rejectButton');
-
-    const applicationStatus = document.querySelector('.applicationStatus');
-    const acceptedApplication = document.querySelector('.acceptedApplication');
-    const rejectedApplication = document.querySelector('.rejectedApplication');
-    const editApplication = document.querySelector('.editApplication');
-    const reviewApplication = document.querySelector('.reviewApplication');
-
-    const applicationDate = document.querySelector('.applicationDate');
-
     const applicationContainer = document.getElementById('applicationContainer');
     const applicationTemplate = document.getElementById('applicationTemplate');
-    const applicationClone = applicationTemplate.contentEditable.cloneNode(true);
+    const applicationClone = applicationTemplate.content.cloneNode(true);
 
+    const applicationNum = applicationClone.querySelector('.applicationNum');
+
+    const makeDecision = applicationClone.querySelector('.makeDecision');
+    const acceptButton = applicationClone.querySelector('.acceptButton');
+    const rejectButton = applicationClone.querySelector('.rejectButton');
+
+    const applicationStatus = applicationClone.querySelector('.applicationStatus');
+    const acceptedApplication = applicationClone.querySelector('.acceptedApplication');
+    const rejectedApplication = applicationClone.querySelector('.rejectedApplication');
+    const editApplication = applicationClone.querySelector('.editApplication');
+    const reviewApplication = applicationClone.querySelector('.reviewApplication');
+
+    const applicationDate = applicationClone.querySelector('.applicationDate');
 
     applicationNum.textContent = app.id;
     applicationDate.textContent = new Date(app.applicationDate).toLocaleDateString();
@@ -86,7 +84,6 @@ function renderApplications(app) {
 
     if (userRole === "Student") { 
         applicationStatus.classList.remove("d-none");
-        createAppliacationButton.classList.remove("d-none");
         if (app.status === "NotDefined") {
             editApplication.classList.remove("d-none");
             reviewApplication.classList.remove("d-none");
@@ -117,4 +114,70 @@ function renderApplications(app) {
     }
 
     applicationContainer.appendChild(applicationClone);
+}
+
+function loadApplications() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const studentId = urlParams.get("studentId");
+
+    let apiUrl;
+
+    if (userRole === "Student") {
+        const userId = getStudentIdFromToken();
+        apiUrl = `/api/applications/student/${userId}`; //потом изменить
+    } else if (userRole === "Admin" || userRole === "Dean" || userRole === "Teacher") {
+        apiUrl = studentId ? `/api/applications/student/${studentId}` : "/api/applications"; //потом изменить
+    } else {
+        console.error("Неизвестная роль пользователя");
+        return;
+    }
+
+    fetch(apiUrl, {     // добавить взаимодействие с API
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401) {
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userRole');
+                window.location.href = 'authorization.html';
+            }
+            throw new Error('Ошибка получения заявок');
+        }
+        return response.json();
+    })
+    .then(apps => {
+        document.getElementById("applicationContainer").innerHTML = "";
+        apps.forEach(app => {
+            renderApplications(app);
+        })
+    })
+    .catch(error => {
+        console.error('Не удалось загрузить заявки:', error);
+        alert('Произошла ошибка при загрузке заявок');
+    });
+}
+
+loadApplications();
+
+//создание заявки
+const createAppliacationButton = document.querySelector('.createAppliacationButton');
+if (token && userEmail && userRole === "Student") {
+    createAppliacationButton.classList.remove('d-none');
+} else {
+    createAppliacationButton.classList.add('d-none');
+}
+    
+createAppliacationButton.addEventListener('click' , () => {
+    window.location.href = 'index.html'; //добавьть переход на страницу создания заявки
+})
+
+//получение айди студента из токена
+function getStudentIdFromToken() {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.studentId || null;
 }

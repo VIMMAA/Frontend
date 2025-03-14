@@ -22,9 +22,10 @@ let tempCells = document.querySelectorAll("td");
         })
     });
 
+let next = document.querySelector("#next");
+let previous = document.querySelector("#previous");
+
 changeStatement.addEventListener('click', () => {
-    let next = document.querySelector("#next");
-    let previous = document.querySelector("#previous");
     let dateStatement = document.querySelector("#dateStatement");
     scheduleStatement.forEach(statement => {
         if (!statement.classList.contains('d-none') && statement.id === "classesTable") {
@@ -55,6 +56,18 @@ changeStatement.addEventListener('click', () => {
             }
         })
     });
+});
+
+let month = 2; // с бэка получим значение - но пока так 
+
+next.addEventListener("click", () => {
+    month = (month + 1) % 12;
+    generateCalendar(2025, month);
+});
+
+previous.addEventListener("click", () => {
+    month = (month - 1 + 12) % 12
+    generateCalendar(2025, month);
 });
 
 document.addEventListener('DOMContentLoaded', () => {

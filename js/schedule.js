@@ -23,11 +23,20 @@ let tempCells = document.querySelectorAll("td");
     });
 
 changeStatement.addEventListener('click', () => {
+    let next = document.querySelector("#next");
+    let previous = document.querySelector("#previous");
+    let dateStatement = document.querySelector("#dateStatement");
     scheduleStatement.forEach(statement => {
-        if (!statement.classList.contains('d-none')) {
+        if (!statement.classList.contains('d-none') && statement.id === "classesTable") {
             statement.classList.toggle('d-none');
+            next.innerHTML = "Следующий месяц &rarr;";
+            previous.innerHTML = "&larr; Предыдущий месяц"; 
+            dateStatement.textContent = "Март";
         } else {
             statement.classList.toggle('d-none');
+            next.innerHTML = "Следующая неделя &rarr;";
+            previous.innerHTML = "&larr; Предыдущая неделя";
+            dateStatement.textContent = "03.03.2025 - 08.03.2025";
         }
         
     })
@@ -121,4 +130,4 @@ function generateCalendar(year, month) {
     }
 }   
 
-generateCalendar(2025, 1);
+generateCalendar(2025, 2);

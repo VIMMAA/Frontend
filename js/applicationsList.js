@@ -86,6 +86,14 @@ function renderApplications(app) {
         applicationStatus.classList.remove("d-none");
         if (app.status === "NotDefined") {
             editApplication.classList.remove("d-none");
+
+            editApplication.replaceWith(editApplication.cloneNode(true));
+            const newEditButton = applicationClone.querySelector(".editApplication");
+
+            newEditButton.addEventListener("click", () => {
+                window.location.href = `index.html?id=${app.id}`; //добавить переход на страницу редактирования
+            });
+
             reviewApplication.classList.remove("d-none");
         } else if (app.status === "Approved") {
             acceptedApplication.classList.remove("d-none");

@@ -54,7 +54,7 @@ document.querySelector('form').addEventListener('submit', function (event) {
             email: email,
         };
 
-        fetch('', { // взаимодействие с API
+        fetch('https://okr.yzserver.ru/api/User/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

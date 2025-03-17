@@ -28,7 +28,9 @@ document.getElementById('registrationForm').addEventListener('submit', function(
     const lastName = document.getElementById('inputLastName').value;
     const password = document.getElementById('inputPassword').value;
     const email = document.getElementById('inputEmail').value;
-    const birthDate = document.getElementById('inputDate').value ? new Date(document.getElementById('inputDate').value).toISOString() : null;
+    const birthDate = document.getElementById('inputDate').value 
+    ? document.getElementById('inputDate').value 
+    : null;
 
     let isValid = true;
 
@@ -97,10 +99,10 @@ document.getElementById('registrationForm').addEventListener('submit', function(
             lastName: lastName,
             password: password,
             email: email,
-            birthDate: birthDate,
+            birthday: birthDate,
         };
         
-        fetch('', {  // добавить взаимодействие с API
+        fetch('https://okr.yzserver.ru/api/User/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -148,6 +150,3 @@ function setValid(inputId) {
     input.classList.remove('is-invalid');
     input.classList.add('is-valid');
 }
-
-
-//разобраться регистрацией по ссылке

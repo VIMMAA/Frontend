@@ -1,6 +1,6 @@
 const logoutButton = document.getElementById('logoutButton');
 
-logoutButton.addEventListener('click', function () {
+logoutButton.addEventListener('click', function (event) {
     event.preventDefault();
     const token = localStorage.getItem('jwtToken');
 
@@ -50,6 +50,9 @@ function updateNavbar() {
 
         document.querySelectorAll('.expectStudent').forEach(el => {
             el.parentElement.classList.toggle('d-none', userRole === 'Student');
+        });
+        document.querySelectorAll('.expectTeacher').forEach(el => {
+            el.parentElement.classList.toggle('d-none', userRole === 'Teacher');
         });
     } else {
         authElements.forEach(el => el.classList.add('d-none'));
@@ -134,6 +137,10 @@ function renderApplications(app) {
         }
     }
 
+    applicationNum.addEventListener('click', () => {
+        window.location.href= `index.html?id=${app.id}`; //добавишь переход на страницу с информацией о заявке
+    })
+
     applicationContainer.appendChild(applicationClone);
 }
 
@@ -189,7 +196,7 @@ function loadApplications() {
     const token = localStorage.getItem('jwtToken');
     const userRole = localStorage.getItem('userRole');
     const urlParams = new URLSearchParams(window.location.search);
-    const studentId = urlParams.get("studentId");
+    const studentId = urlParams.get("id");
 
     if (!token || !userRole) {
         console.warn("Токен или роль пользователя отсутствуют. Перенаправление на страницу входа.");
@@ -208,7 +215,7 @@ function loadApplications() {
         apiUrl = `https://okr.yzserver.ru/api/Application/applicationList/${userId}`;
     } else if (["Admin", "Dean", "Teacher"].includes(userRole)) {
         apiUrl = studentId
-            ? `https://okr.yzserver.ru/api/Application/applicationList${studentId}`
+            ? `https://okr.yzserver.ru/api/Application/applicationList/${studentId}`
             : "https://okr.yzserver.ru/api/Application/applicationList";
     } else {
         console.error("Неизвестная роль пользователя:", userRole);
@@ -241,6 +248,10 @@ function loadApplications() {
         container.innerHTML = "";
     
         if (Array.isArray(data)) {
+            if (userRole !== "Student" && data.length === 0) {
+                alert('Пользователь не заявок');
+                window.location.href = 'users.html';
+            }
             data.forEach(app => renderApplications(app));
         } else if (data.applications && Array.isArray(data.applications)) {
             data.applications.forEach(app => renderApplications(app));

@@ -69,10 +69,12 @@ document.querySelector('form').addEventListener('submit', function (event) {
             })
             .then(data => {
                 if (data.token) {
+                    setValid('inputPassword', 'passwordFeedback');
+
                     localStorage.setItem('jwtToken', data.token);
                     localStorage.setItem('userEmail', email);
                     localStorage.setItem('userRole', data.role)
-    
+
                     if (data.role === "Teacher") {
                         window.location.href = 'users.html';
                     }
@@ -83,7 +85,7 @@ document.querySelector('form').addEventListener('submit', function (event) {
                 }
             })
             .catch(error => {
-                if (error.message === 'Login failed') {
+                if (error.message === 'Invalid email or password') {
                     setInvalid('inputPassword', 'passwordFeedback', 'Неправильный логин или пароль.');
                 } else {
                     console.error('Ошибка при авторизации:', error);

@@ -29,7 +29,7 @@ function handleLogout() {
     localStorage.removeItem('userRole');
 
     updateNavbar();
-    
+
     window.location.href = 'authorization.html';
 }   
 
@@ -130,3 +130,57 @@ function loadUsers() {
 }
 
 loadUsers();
+
+const userRole = localStorage.getItem('userRole');
+const token = localStorage.getItem('jwtToken');
+
+if (userRole === "Dean") {
+    const registrationAccordion = document.getElementById('registrationAccordion');
+    const roleSelect = document.getElementById('roleSelect');
+    const registrationLink = document.getElementById('registrationLink');
+    const copyButton = document.querySelector('.copyLinkButton');
+    const createLinkButton = document.querySelector('.createLinkButton');
+
+    registrationAccordion.classList.remove('d-none');
+
+    createLinkButton.addEventListener('click', () => {
+        const role = roleSelect.value;
+        const apiUrl = `https://okr.yzserver.ru/api/InvitationLink?role=${role}`;
+
+        fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem('jwtToken');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userRole');
+                    window.location.href = 'authorization.html';
+                }
+                throw new Error(`Ошибка получения ссылки: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            registrationLink.value = `http://127.0.0.1:5500/html/registration.html?id=${data.generatedLink}`;
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке ссылки:', error);
+            alert('Произошла ошибка при загрузке ссылки');
+        });
+    });
+
+    copyButton.addEventListener("click", () => {
+        navigator.clipboard.writeText(registrationLink.value)
+            .then(() => {
+                console.log("Ссылка скопирована:", registrationLink.value);
+                alert('Ссылка скопирована');
+            })
+            .catch(err => console.error("Ошибка копирования:", err));
+    });
+}

@@ -1,3 +1,7 @@
+localStorage.removeItem('jwtToken');
+localStorage.removeItem('userEmail');
+localStorage.removeItem('userRole');
+
 document.addEventListener('DOMContentLoaded', function () {
     const userEmail = localStorage.getItem('userEmail');
     const token = localStorage.getItem('jwtToken');
@@ -101,8 +105,14 @@ document.getElementById('registrationForm').addEventListener('submit', function(
             email: email,
             birthday: birthDate,
         };
+
+        const registrationId = new URLSearchParams(window.location.search).get('id');
+
+        const registrationUrl = registrationId 
+        ? `https://okr.yzserver.ru/api/User/register/${registrationId}`
+        : 'https://okr.yzserver.ru/api/User/register';
         
-        fetch('https://okr.yzserver.ru/api/User/register', {
+        fetch(registrationUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

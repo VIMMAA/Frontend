@@ -1,29 +1,52 @@
-
-//необходимо грамотно для расписания переменные подсчитать потом
-//нужно помимо таблиц еще вывод дней недели поменять
+let selectedDays = [];  // Для выделения дней в календаре
+let selectedClasses = [];  // Для выделения пар в расписании
 let scheduleStatement = document.querySelectorAll('table');
-console.log(scheduleStatement);
-
 let changeStatement = document.querySelector('#statement');
-console.log(changeStatement);
-
-let tempCells = document.querySelectorAll("td");
-    let cells = Array.from(tempCells);
-    
-    cells = scheduleStatement[0].classList.contains('d-none') ? Array.from(tempCells).filter((_, index) => (index) % 7 !== 0) : Array.from(tempCells);
-    
-    cells.forEach(cell => {
-        cell.addEventListener('click', () => {
-            if (cell.textContent.length > 0)
-                    cell.classList.toggle("selected");
-            else if (cell.classList.contains('selected')) {
-                    cell.classList.toggle("selected");
-            }
-        })
-    });
-
 let next = document.querySelector("#next");
 let previous = document.querySelector("#previous");
+let month = 2;
+
+function updateCells() {
+    let tempCells = document.querySelectorAll("td");
+    let cells = Array.from(tempCells);
+
+    
+    cells = scheduleStatement[1].classList.contains('d-none') ? Array.from(tempCells).filter((_, index) => (index) % 7 !== 0) : Array.from(tempCells);
+
+    cells.forEach(cell => {
+        cell.removeEventListener('click', handleClassClick); 
+        cell.addEventListener('click', handleClassClick);  
+
+        
+        const cellId = cell.getAttribute('data-id');
+        if (selectedClasses.includes(cellId)) {
+            cell.classList.add("selected");
+        }
+    });
+}
+
+function handleClassClick(event) {
+    const cell = event.target;
+
+    
+    if (cell.textContent.length > 0) {
+        const cellId = cell.getAttribute('data-id');
+
+       
+        cell.classList.toggle("selected");
+
+        
+        if (cell.classList.contains("selected")) {
+            if (!selectedClasses.includes(cellId)) {
+                selectedClasses.push(cellId);
+            }
+        } else {
+            selectedClasses = selectedClasses.filter(id => id !== cellId);
+        }
+
+        console.log(selectedClasses);
+    }
+}
 
 changeStatement.addEventListener('click', () => {
     let dateStatement = document.querySelector("#dateStatement");
@@ -32,41 +55,29 @@ changeStatement.addEventListener('click', () => {
             statement.classList.toggle('d-none');
             next.innerHTML = "Следующий месяц &rarr;";
             previous.innerHTML = "&larr; Предыдущий месяц"; 
-            dateStatement.textContent = "Март";
+            dateStatement.textContent = `${month + 1} месяц`;
         } else {
             statement.classList.toggle('d-none');
             next.innerHTML = "Следующая неделя &rarr;";
             previous.innerHTML = "&larr; Предыдущая неделя";
-            dateStatement.textContent = "03.03.2025 - 08.03.2025";
+            dateStatement.textContent = `03.03.2025 - 08.03.2025`;
         }
-        
-    })
-
-    let tempCells = document.querySelectorAll("td");
-    let cells = Array.from(tempCells);
-    
-    cells = scheduleStatement[0].classList.contains('d-none') ? Array.from(tempCells).filter((_, index) => (index) % 7 !== 0) : Array.from(tempCells);
-    
-    cells.forEach(cell => {
-        cell.addEventListener('click', () => {
-            if (cell.textContent.length > 0)
-                    cell.classList.toggle("selected");
-            else if (cell.classList.contains('selected')) {
-                    cell.classList.toggle("selected");
-            }
-        })
     });
-});
 
-let month = 2; // с бэка получим значение - но пока так 
+    updateCells();
+});
 
 next.addEventListener("click", () => {
     month = (month + 1) % 12;
+    dateStatement.textContent = `${month + 1} месяц`;
     generateCalendar(2025, month);
+    updateCells();
 });
 
 previous.addEventListener("click", () => {
-    month = (month - 1 + 12) % 12
+    
+    month = (month - 1 + 12) % 12;
+    dateStatement.textContent = `${month + 1} месяц`;
     generateCalendar(2025, month);
 });
 

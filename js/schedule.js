@@ -56,11 +56,13 @@ changeStatement.addEventListener('click', () => {
             next.innerHTML = "Следующий месяц &rarr;";
             previous.innerHTML = "&larr; Предыдущий месяц"; 
             dateStatement.textContent = `${month + 1} месяц`;
+            changeStatement.textContent = "Открыть расписание";
         } else {
             statement.classList.toggle('d-none');
             next.innerHTML = "Следующая неделя &rarr;";
             previous.innerHTML = "&larr; Предыдущая неделя";
             dateStatement.textContent = `03.03.2025 - 08.03.2025`;
+            changeStatement.textContent = "Открыть календарь";
         }
     });
 
@@ -68,17 +70,21 @@ changeStatement.addEventListener('click', () => {
 });
 
 next.addEventListener("click", () => {
-    month = (month + 1) % 12;
-    dateStatement.textContent = `${month + 1} месяц`;
-    generateCalendar(2025, month);
-    updateCells();
+    if (changeStatement.textContent == "Открыть расписание") {
+        month = (month + 1) % 12;
+        dateStatement.textContent = `${month + 1} месяц`;
+        generateCalendar(2025, month);
+        updateCells();
+    }
 });
 
 previous.addEventListener("click", () => {
-    
-    month = (month - 1 + 12) % 12;
-    dateStatement.textContent = `${month + 1} месяц`;
-    generateCalendar(2025, month);
+    if (changeStatement.textContent == "Открыть расписание") {
+        month = (month - 1 + 12) % 12;
+        dateStatement.textContent = `${month + 1} месяц`;
+        generateCalendar(2025, month);   
+        updateCells();
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -162,7 +168,6 @@ function generateCalendar(year, month) {
         }
     }
 }
-
 
 generateCalendar(2025, 2);
 updateCells();

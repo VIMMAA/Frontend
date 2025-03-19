@@ -267,22 +267,24 @@ function loadApplications() {
 
 loadApplications();
 
-//создание заявки
-const createAppliacationButton = document.querySelector('.createAppliacationButton');
-const token = localStorage.getItem('jwtToken');
-const userEmail = localStorage.getItem('userEmail');
-const userRole = localStorage.getItem('userRole');
 
-if (token && userEmail && userRole === "Student") {
-    createAppliacationButton.classList.remove('d-none');
-} else {
-    createAppliacationButton.classList.add('d-none');
+if (document.location.pathname.includes("applicationsList.html")) {
+        //создание заявки
+    const createAppliacationButton = document.querySelector('.createAppliacationButton');
+    const token = localStorage.getItem('jwtToken');
+    const userEmail = localStorage.getItem('userEmail');
+    const userRole = localStorage.getItem('userRole');
+
+    if (token && userEmail && userRole === "Student") {
+        createAppliacationButton.classList.remove('d-none');
+    } else {
+        createAppliacationButton.classList.add('d-none');
+    }
 }
-    
-createAppliacationButton.addEventListener('click' , () => {
-    window.location.href = 'index.html'; //добавьть переход на страницу создания заявки
-})
 
+createAppliacationButton.addEventListener('click' , () => {
+    window.location.href = 'schedule.html'; //добавьть переход на страницу создания заявки
+})
 
 function getStudentIdFromToken() {
     const token = localStorage.getItem('jwtToken');

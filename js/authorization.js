@@ -6,10 +6,11 @@ if (token) {
     if (userRole === "Teacher") {
         window.location.href = 'users.html';
     }
-    else {
+    else if (userRole !== "Teacher" && !(window.location.href.includes('applicationsList.html') || window.location.href.includes('schedule.html'))) {
         window.location.href = 'applicationsList.html';
     }
 }
+
 
 const authElements = document.querySelectorAll('.auth-only');
 const guestElements = document.querySelectorAll('.guest-only');

@@ -133,7 +133,8 @@ function generateCalendar(year, month) {
         
         for (let j = 0; j < 7; j++) {
             let cell = document.createElement('td');
-            
+            let cellId = `${year}-${month + 1}-${date}`; 
+
             if (i === 0 && j < (firstDay === 0 ? 6 : firstDay - 1)) {
                 cell.innerHTML = '';
             } else if (date > daysInMonth) {
@@ -142,7 +143,15 @@ function generateCalendar(year, month) {
                 cell.innerHTML = date;
                 date++;
             }
-            
+
+            cell.setAttribute('data-id', cellId);
+            cell.addEventListener('click', handleClassClick);
+
+            if (selectedClasses.includes(cellId)) {
+                cell.classList.add('selected');
+            }
+
+
             row.appendChild(cell);
         }
         
@@ -152,6 +161,8 @@ function generateCalendar(year, month) {
             break;
         }
     }
-}   
+}
+
 
 generateCalendar(2025, 2);
+updateCells();

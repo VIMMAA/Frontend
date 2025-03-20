@@ -1,9 +1,11 @@
 const actualDate = new Date().toISOString();
 let month = new Date().getMonth();
 let year = new Date().getFullYear();
+let selectedClasses = [];
 launchStatic();
 eventClickers(month);
 generateCalendar(year, month);
+updateCells();
 
 function eventClickers(month) {
     let changeStatement = document.querySelector('#statement');
@@ -30,7 +32,7 @@ function eventClickers(month) {
             }
         });
     
-        //updateCells();
+        updateCells();
     });
     
     next.addEventListener("click", () => {
@@ -38,7 +40,7 @@ function eventClickers(month) {
             month = (month + 1) % 12;
             dateStatement.textContent = `${month + 1} месяц`;
             generateCalendar(2025, month);
-            //updateCells();
+            updateCells();
         }
     });
     
@@ -47,7 +49,7 @@ function eventClickers(month) {
             month = (month - 1 + 12) % 12;
             dateStatement.textContent = `${month + 1} месяц`;
             generateCalendar(2025, month);   
-            //updateCells();
+            updateCells();
         }
     });
 }
@@ -94,52 +96,46 @@ function generateCalendar(year, month) {
     }
 }
 
-// let selectedDays = [];  // Для выделения дней в календаре
-// let selectedClasses = [];  // Для выделения пар в расписании
-
-// let month = 2;
-
-// function updateCells() {
-//     let tempCells = document.querySelectorAll("td");
-//     let cells = Array.from(tempCells);
-
+function handleClassClick(event) {
+    const cell = event.target;
     
-//     cells = scheduleStatement[1].classList.contains('d-none') ? Array.from(tempCells).filter((_, index) => (index) % 7 !== 0) : Array.from(tempCells);
-
-//     cells.forEach(cell => {
-//         cell.removeEventListener('click', handleClassClick); 
-//         cell.addEventListener('click', handleClassClick);  
-
-        
-//         const cellId = cell.getAttribute('data-id');
-//         if (selectedClasses.includes(cellId)) {
-//             cell.classList.add("selected");
-//         }
-//     });
-// }
-
-// function handleClassClick(event) {
-//     const cell = event.target;
-
-    
-//     if (cell.textContent.length > 0) {
-//         const cellId = cell.getAttribute('data-id');
+    if (cell.textContent.length > 0) {
+        const cellId = cell.getAttribute('data-id');
 
        
-//         cell.classList.toggle("selected");
+        cell.classList.toggle("selected");
 
         
-//         if (cell.classList.contains("selected")) {
-//             if (!selectedClasses.includes(cellId)) {
-//                 selectedClasses.push(cellId);
-//             }
-//         } else {
-//             selectedClasses = selectedClasses.filter(id => id !== cellId);
-//         }
+        if (cell.classList.contains("selected")) {
+            if (!selectedClasses.includes(cellId)) {
+                selectedClasses.push(cellId);
+            }
+        } else {
+            selectedClasses = selectedClasses.filter(id => id !== cellId);
+        }
 
-//         console.log(selectedClasses);
-//     }
-// }
+        console.log(selectedClasses);
+    }
+}
+
+function updateCells() {
+    let tempCells = document.querySelectorAll("td");
+    const scheduleStatement = document.querySelectorAll('table');
+    let cells = Array.from(tempCells);
+
+    cells = scheduleStatement[1].classList.contains('d-none') ? Array.from(tempCells).filter((_, index) => (index) % 7 !== 0) : Array.from(tempCells);
+
+    cells.forEach(cell => {
+        cell.removeEventListener('click', handleClassClick); 
+        cell.addEventListener('click', handleClassClick);  
+
+        
+        const cellId = cell.getAttribute('data-id');
+        if (selectedClasses.includes(cellId)) {
+            cell.classList.add("selected");
+        }
+    });
+}
 
 // document.addEventListener('DOMContentLoaded', () => {
 //     const fileInput = document.getElementById('fileInput');
@@ -180,10 +176,6 @@ function generateCalendar(year, month) {
 //         }
 //     });
 // });
-
-
-// generateCalendar(2025, 2);
-// updateCells();
 
 //часть кода где будут запросы к бэку
 

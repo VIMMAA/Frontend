@@ -4,7 +4,6 @@ let selectedClasses = [];
 let flagDay = new Date();
 launchStatic();
 eventClickers(month);
-generateCalendar(year, month);
 updateCells();
 
 function eventClickers(month) {
@@ -66,48 +65,6 @@ function eventClickers(month) {
             updateCells();
         }
     });
-}
-
-function generateCalendar(year, month) {
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const calendarBody = document.getElementById('calendarBody');
-    calendarBody.innerHTML = '';
-
-    let date = 1;
-    for (let i = 0; i < 6; i++) { 
-        let row = document.createElement('tr');
-        
-        for (let j = 0; j < 7; j++) {
-            let cell = document.createElement('td');
-            let cellId = `${year}-${month + 1}-${date}`; 
-
-            if (i === 0 && j < (firstDay === 0 ? 6 : firstDay - 1)) {
-                cell.innerHTML = '';
-            } else if (date > daysInMonth) {
-                cell.innerHTML = '';
-            } else {
-                cell.innerHTML = date;
-                date++;
-            }
-
-            cell.setAttribute('data-id', cellId);
-            cell.addEventListener('click', handleClassClick);
-
-            if (selectedClasses.includes(cellId)) {
-                cell.classList.add('selected');
-            }
-
-
-            row.appendChild(cell);
-        }
-        
-        calendarBody.appendChild(row);
-        
-        if (date > daysInMonth) {
-            break;
-        }
-    }
 }
 
 function handleClassClick(event) {

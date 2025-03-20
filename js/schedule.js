@@ -414,51 +414,6 @@ function fileToBase64(file) {
         };
     });
 }
-document.addEventListener('DOMContentLoaded', () => {
-    const submitApplicationButton = document.getElementById('submitApplication');
-    if (submitApplicationButton) {
-        submitApplicationButton.addEventListener('click', async () => {
-            const files = document.getElementById('fileInput').files;
-
-            if (files.length === 0) {
-                alert('Пожалуйста, загрузите хотя бы один файл.');
-                return;
-            }
-
-            const applicationData = {
-                lessons: selectedClasses,
-                files: []
-            };
-
-            console.log('Начало обработки файлов...');
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                console.log(`Обработка файла: ${file.name}`);
-                try {
-                    const base64Data = await fileToBase64(file);
-                    console.log(`Файл "${file.name}" успешно преобразован в base64.`);
-                    applicationData.files.push({
-                        name: file.name,
-                        data: base64Data
-                    });
-                } catch (error) {
-                    console.error(`Ошибка при чтении файла "${file.name}":`, error);
-                    alert(`Ошибка при чтении файла ${file.name}.`);
-                    return;
-                }
-            }
-
-            console.log('Данные заявки:', applicationData);
-            if (applicationData.files.length === 0) {
-                console.error('Файлы не были добавлены в applicationData.files.');
-                alert('Ошибка: файлы не были обработаны.');
-                return;
-            }
-
-            submitApplication(applicationData);
-        });
-    }
-});
 
 function updateFileList() {
     const fileList = document.getElementById('fileList');

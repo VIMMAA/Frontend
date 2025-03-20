@@ -68,7 +68,7 @@
                     <button class="btn btn-primary" id="next">Следующая неделя &rarr;</button>
                 </div>
         
-                <button class="btn btn-primary ms-auto" id="statement">Открыть календарь</button>
+                <button class="btn btn-primary ms-auto d-none" id="statement">Открыть календарь</button>
             </div>
         </div>
         
@@ -181,11 +181,11 @@
             </ul>
             <form id="uploadForm" enctype="multipart/form-data">
                 <div class="mb-3">
-                    <input type="file" class="form-control" id="fileInput" name="files[]" multiple>
+                    <input type="file" class="form-control" id="fileInput" name="files">
                 </div>
             </form>
-            <button id="uploadButton" class="btn btn-primary mt-2">Загрузить файл</button>
-            <button id="submitApplication" class="btn btn-success mt-2">Отправить заявку</button>
+            <button id="uploadButton" class="btn btn-primary mt-2 d-none">Загрузить файл</button>
+            <button id="submitApplication" class="btn btn-primary mt-2">Отправить заявку</button>
         </div>
         
         

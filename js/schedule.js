@@ -152,93 +152,87 @@ function updateCells() {
 let applicationData = { files: [] }; // Глобальная переменная
 
 document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('fileInput');
-    const fileList = document.getElementById('fileList');
     const submitApplicationButton = document.getElementById('submitApplication');
-
-    const allowedExtensions = ['jpg', 'jpeg', 'png'];
-
-    // Функция для преобразования файла в base64
-    function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => {
-                console.log(`Файл "${file.name}" успешно прочитан.`);
-                const base64String = reader.result.split(',')[1]; // Убираем префикс "data:image/png;base64,"
-                resolve(base64String);
-            };
-            reader.onerror = (error) => {
-                console.error(`Ошибка при чтении файла "${file.name}":`, error);
-                reject(error);
-            };
-        });
-    }
-
-    // Обработчик загрузки файлов
-    fileInput.addEventListener('change', async () => {
-        const files = fileInput.files;
-
-        if (files.length === 0) {
-            console.log('Файлы не выбраны.');
-            return;
-        }
-
-        console.log('Выбранные файлы:', files);
-
-        applicationData.files = []; // Очищаем предыдущие файлы
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            console.log(`Обработка файла: ${file.name}`);
-            try {
-                const base64Data = await fileToBase64(file);
-                console.log(`Файл "${file.name}" успешно преобразован в base64.`);
-                applicationData.files.push({
-                    name: file.name,
-                    data: base64Data
-                });
-            } catch (error) {
-                console.error(`Ошибка при чтении файла "${file.name}":`, error);
-                alert(`Ошибка при чтении файла ${file.name}.`);
-                return;
-            }
-        }
-        console.log('Файлы после обработки:', applicationData.files);
-    });
-
-    // Обработчик удаления файлов из списка
-    fileList.addEventListener('click', (event) => {
-        if (event.target.classList.contains('delete-file')) {
-            const li = event.target.closest('li');
-            fileList.removeChild(li);
-        }
-    });
-
-    // Обработчик отправки заявки
     if (submitApplicationButton) {
-        submitApplicationButton.addEventListener('click', () => {
-            if (applicationData.files.length === 0) {
+        submitApplicationButton.addEventListener('click', async () => {
+            // Блокируем кнопку
+            submitApplicationButton.disabled = true;
+            submitApplicationButton.textContent = 'Отправка...';
+
+            const files = document.getElementById('fileInput').files;
+
+            if (files.length === 0) {
                 alert('Пожалуйста, загрузите хотя бы один файл.');
+                submitApplicationButton.disabled = false; // Разблокируем кнопку
+                submitApplicationButton.textContent = 'Отправить заявку';
                 return;
             }
 
-            // Добавьте выбранные пары (lessons) в applicationData
-            applicationData.lessons = selectedClasses;
+            const applicationData = {
+                lessons: selectedClasses,
+                files: []
+            };
+
+            console.log('Начало обработки файлов...');
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                console.log(`Обработка файла: ${file.name}`);
+                try {
+                    const base64Data = await fileToBase64(file);
+                    console.log(`Файл "${file.name}" успешно преобразован в base64.`);
+                    applicationData.files.push({
+                        name: file.name,
+                        data: base64Data
+                    });
+                } catch (error) {
+                    console.error(`Ошибка при чтении файла "${file.name}":`, error);
+                    alert(`Ошибка при чтении файла ${file.name}.`);
+                    submitApplicationButton.disabled = false; // Разблокируем кнопку
+                    submitApplicationButton.textContent = 'Отправить заявку';
+                    return;
+                }
+            }
 
             console.log('Данные заявки:', applicationData);
-            submitApplication(applicationData); // Отправка заявки
+            if (applicationData.files.length === 0) {
+                console.error('Файлы не были добавлены в applicationData.files.');
+                alert('Ошибка: файлы не были обработаны.');
+                submitApplicationButton.disabled = false; // Разблокируем кнопку
+                submitApplicationButton.textContent = 'Отправить заявку';
+                return;
+            }
+
+            // Отправка заявки
+            try {
+                const response = await submitApplication(applicationData);
+                if (response.ok) {
+                    console.log('Заявка успешно отправлена.');
+                    alert('Заявка успешно отправлена!');
+                    // Перенаправляем пользователя на страницу заявок
+                    window.location.href = 'applicationsList.html'; // Замените на нужный URL
+                } else {
+                    const errorData = await response.json();
+                    console.error('Ошибка при отправке заявки:', errorData);
+                    alert(`Ошибка при отправке заявки: ${errorData.message || 'Неизвестная ошибка'}`);
+                }
+            } catch (error) {
+                console.error('Ошибка при отправке заявки:', error);
+                alert('Ошибка при отправке заявки.');
+            } finally {
+                // Разблокируем кнопку после завершения запроса
+                submitApplicationButton.disabled = false;
+                submitApplicationButton.textContent = 'Отправить заявку';
+            }
         });
     }
 });
-
-// Функция отправки заявки на сервер
-function submitApplication(data) {
+async function submitApplication(data) {
     const token = localStorage.getItem('jwtToken');
 
     console.log('Отправка данных на сервер...');
     console.log('Данные:', data);
 
-    fetch('https://okr.yzserver.ru/api/Application', {
+    return fetch('https://okr.yzserver.ru/api/Application', {
         method: 'POST',
         headers: {
             'accept': '*/*',
@@ -246,29 +240,9 @@ function submitApplication(data) {
             'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(data)
-    })
-    .then(response => {
-        console.log('Ответ сервера:', response);
-        if (response.ok) {
-            console.log('Заявка успешно отправлена.');
-            alert('Заявка успешно отправлена!');
-            return response.json();
-        } else {
-            console.error('Ошибка при отправке заявки:', response.status);
-            return response.json().then(err => {
-                console.error('Тело ошибки:', err);
-                alert(`Ошибка при отправке заявки: ${err.message || 'Неизвестная ошибка'}`);
-            });
-        }
-    })
-    .then(data => {
-        console.log('Ответ сервера:', data);
-    })
-    .catch(error => {
-        console.error('Ошибка при отправке заявки:', error);
-        alert('Ошибка при отправке заявки.');
     });
 }
+
 
 //часть кода где будут запросы к бэку
 
@@ -486,41 +460,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// function submitApplication(data) {
-//     const token = localStorage.getItem('jwtToken');
+function updateFileList() {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = ''; // Очищаем список перед обновлением
 
-//     console.log('Отправка данных на сервер...');
-//     console.log('Данные:', data);
+    applicationData.files.forEach((file, index) => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center bg-secondary text-white';
+        li.innerHTML = `
+            <span>${file.name}</span>
+            <button class="btn btn-danger btn-sm delete-file" data-index="${index}">Удалить</button>
+        `;
+        fileList.appendChild(li);
+    });
+}
 
-//     console.log('Данные перед отправкой:', applicationData);
-//     fetch('https://okr.yzserver.ru/api/Application', {
-//         method: 'POST',
-//         headers: {
-//             'accept': '*/*',
-//             'Content-Type': 'application/json',
-//             'Authorization': `Bearer ${token}`,
-//         },
-//         body: JSON.stringify(applicationData)
-//     })
-//     .then(response => {
-//         console.log('Ответ сервера:', response);
-//         if (response.ok) {
-//             console.log('Заявка успешно отправлена.');
-//             alert('Заявка успешно отправлена!');
-//             return response.json();
-//         } else {
-//             console.error('Ошибка при отправке заявки:', response.status);
-//             return response.json().then(err => {
-//                 console.error('Тело ошибки:', err);
-//                 alert(`Ошибка при отправке заявки: ${err.message || 'Неизвестная ошибка'}`);
-//             });
-//         }
-//     })
-//     .then(data => {
-//         console.log('Ответ сервера:', data);
-//     })
-//     .catch(error => {
-//         console.error('Ошибка при отправке заявки:', error);
-//         alert('Ошибка при отправке заявки.');
-//     });
-// }
+function updateFileList() {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = ''; // Очищаем список перед обновлением
+
+    applicationData.files.forEach((file, index) => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center bg-secondary text-white';
+        li.innerHTML = `
+            <span>${file.name}</span>
+            <button class="btn btn-danger btn-sm delete-file" data-index="${index}">Удалить</button>
+        `;
+        fileList.appendChild(li);
+    });
+}

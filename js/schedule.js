@@ -114,21 +114,19 @@ function handleClassClick(event) {
     const cell = event.target;
     
     if (cell.textContent.length > 0) {
-        const cellId = cell.getAttribute('data-id');
+        const cellId = cell.getAttribute('data-id'); // Используем data-id
 
-       
         cell.classList.toggle("selected");
 
-        
         if (cell.classList.contains("selected")) {
             if (!selectedClasses.includes(cellId)) {
-                selectedClasses.push(cellId);
+                selectedClasses.push(cellId); // Добавляем ID пары в массив
             }
         } else {
-            selectedClasses = selectedClasses.filter(id => id !== cellId);
+            selectedClasses = selectedClasses.filter(id => id !== cellId); // Удаляем ID пары из массива
         }
 
-        console.log(selectedClasses);
+        console.log(selectedClasses); // Логируем массив выбранных ID
     }
 }
 
@@ -220,7 +218,9 @@ function getDatesForWeek(startDate) {
 }
 
 async function launchStatic(diff = 0) { 
-    //добавить потом флаг чтоб брало время сегодняшнего момента только в первый раз
+    // Убираем очистку selectedClasses
+    // selectedClasses = [];
+
     flagDay.setDate(flagDay.getDate() + diff * 7);
     console.log(flagDay);
     const weekRange = getWeekRange(flagDay);
@@ -259,12 +259,13 @@ function setTimeInCells(weekDates) {
         "20:15:00Z",
     ];
 
-    // Очищаем предыдущие данные
+    // Очищаем предыдущие данные и выделение
     rows.forEach(row => {
         const cells = row.querySelectorAll("td");
         cells.forEach(cell => {
             cell.removeAttribute('data-time');
             cell.textContent = '';
+            cell.classList.remove('selected'); // Снимаем выделение
         });
     });
 
@@ -290,11 +291,9 @@ function setTimeInCells(weekDates) {
         });
     });
 }
-
 function loadClasses(dateFrom, dateTo) {
     const token = localStorage.getItem('jwtToken');
-    const classes = [];
-    //нужно ограничить количество пар в запросе, добавлять их в какой-то массив
+
     fetch(`https://okr.yzserver.ru/api/Schedule?DateFrom=${dateFrom}&DateTo=${dateTo}`, {
         method: 'GET',
         headers: {
@@ -324,15 +323,18 @@ function loadClasses(dateFrom, dateTo) {
             };
             console.log(dayClass);
 
-            //нужно найти в emptyCells date-time которая равна startTime
-
+            // Находим ячейку с соответствующим data-time
             emptyCells.forEach(cell => {
                 if (cell.getAttribute('data-time') === dayClass.startTime) {
-                    cell.setAttribute('data-id', dayClass.id);
+                    cell.setAttribute('data-id', dayClass.id); // Устанавливаем data-id
                     cell.textContent = dayClass.name;
+
+                    // Проверяем, нужно ли выделить ячейку
+                    if (selectedClasses.includes(dayClass.id)) {
+                        cell.classList.add('selected');
+                    }
                 }
             });
-    
         });
     })
     .catch(error => {

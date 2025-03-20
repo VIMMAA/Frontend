@@ -1,7 +1,7 @@
 let month = new Date().getMonth();
 let year = new Date().getFullYear();
 let selectedClasses = [];
-let flag = true;
+let flagDay = new Date();
 launchStatic();
 eventClickers(month);
 generateCalendar(year, month);
@@ -49,6 +49,20 @@ function eventClickers(month) {
             month = (month - 1 + 12) % 12;
             dateStatement.textContent = `${month + 1} месяц`;
             generateCalendar(2025, month);   
+            updateCells();
+        }
+    });
+
+    next.addEventListener("click", () => {
+        if (changeStatement.textContent == "Открыть календарь") {
+            launchStatic(1);
+            updateCells();
+        }
+    });
+    
+    previous.addEventListener("click", () => {
+        if (changeStatement.textContent == "Открыть календарь") {
+            launchStatic(-1);
             updateCells();
         }
     });
@@ -205,9 +219,11 @@ function getDatesForWeek(startDate) {
     return weekDates;
 }
 
-async function launchStatic() {
+async function launchStatic(diff = 0) { 
     //добавить потом флаг чтоб брало время сегодняшнего момента только в первый раз
-    const weekRange = getWeekRange(new Date());
+    flagDay.setDate(flagDay.getDate() + diff * 7);
+    console.log(flagDay);
+    const weekRange = getWeekRange(flagDay);
     const weekDates = getDatesForWeek(weekRange.startOfWeek);
 
     document.getElementById('dateStatement').innerHTML = `${weekRange.startOfWeekISO.slice(0, 10)} по ${weekRange.endOfWeekISO.slice(0, 10)}`;
@@ -225,16 +241,14 @@ async function launchStatic() {
     }
     console.log(weekDates);//беру
     console.log(weekRange);
+
     await setTimeInCells(weekDates);
 
-    loadClasses();
+    loadClasses(weekRange.startOfWeekISO, weekRange.endOfWeekISO);
 }
 
 function setTimeInCells(weekDates) {
-    let arrayCells = document.querySelectorAll("td");
-
-    let emptyCells = Array.from(arrayCells).filter(cell => cell.textContent.trim() === "");
-
+    const rows = document.querySelectorAll("#classesTable tbody tr"); // Все строки таблицы
     const timeStarters = [
         "08:45:00Z",
         "10:35:00Z",
@@ -243,39 +257,45 @@ function setTimeInCells(weekDates) {
         "16:35:00Z",
         "18:25:00Z",
         "20:15:00Z",
-    ]
+    ];
 
-    console.log(emptyCells.length);
-    let j = -1;
-    for (let i = 0; i < emptyCells.length; i++) {
-        if (i % 7 == 0) {
-            j++;
-        }
-        let currentDate = new Date(weekDates[i % 7]); // копируем дату с начала недели+
-    
-        currentDate.setDate(currentDate.getDate());  // i - это индекс дня недели+
-    
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth() + 1;
-        const day = currentDate.getDate();
-        
-        const timeStarter = timeStarters[j];
-        console.log(j);
-        const isoDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${timeStarter}`;
-        
-        if (i % 7 !== 6) {
-            emptyCells[i].setAttribute('data-time', isoDate);
-        }
-        
-    }
-    
+    // Очищаем предыдущие данные
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        cells.forEach(cell => {
+            cell.removeAttribute('data-time');
+            cell.textContent = '';
+        });
+    });
+
+    // Заполняем ячейки
+    rows.forEach((row, rowIndex) => {
+        if (rowIndex >= timeStarters.length) return; // Проверяем, чтобы не выйти за пределы временных слотов
+
+        const cells = row.querySelectorAll("td");
+        cells.forEach((cell, cellIndex) => {
+            if (cellIndex === 0) return; // Пропускаем первый столбец (время)
+
+            const dayIndex = cellIndex - 1; // Индекс дня недели (0-6)
+            const currentDate = new Date(weekDates[dayIndex]); // Дата для текущего дня
+
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+
+            const timeStarter = timeStarters[rowIndex]; // Временной слот
+            const isoDate = `${year}-${month}-${day}T${timeStarter}`;
+
+            cell.setAttribute('data-time', isoDate); // Устанавливаем data-time
+        });
+    });
 }
 
-function loadClasses() {
+function loadClasses(dateFrom, dateTo) {
     const token = localStorage.getItem('jwtToken');
     const classes = [];
     //нужно ограничить количество пар в запросе, добавлять их в какой-то массив
-    fetch('https://okr.yzserver.ru/api/Schedule?DateFrom=2025-03-17T00:00:00Z&DateTo=2025-03-28T00:00:00Z', {
+    fetch(`https://okr.yzserver.ru/api/Schedule?DateFrom=${dateFrom}&DateTo=${dateTo}`, {
         method: 'GET',
         headers: {
             accept: '*/*',

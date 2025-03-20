@@ -174,10 +174,31 @@
 
 //часть кода где будут запросы к бэку
 
-console.log('ораюльае');
+function getWeekRange(date) {
+    const currentDate = new Date(date);
+    const dayOfWeek = currentDate.getDay();
+    const diffToStartOfWeek = currentDate.getDate() - dayOfWeek + 1;
+    const startOfWeek = new Date(currentDate.setDate(diffToStartOfWeek));
+    const endOfWeek = new Date(currentDate.setDate(diffToStartOfWeek + 6));
+
+    const startOfWeekISO = startOfWeek.toISOString();
+    const endOfWeekISO = endOfWeek.toISOString();
+
+    return { startOfWeekISO, endOfWeekISO };
+}
+
+function launchStatic() {
+    const weekRange = getWeekRange(new Date());
+    console.log('Актуальная неделя:', weekRange.startOfWeekISO, 'по', weekRange.endOfWeekISO);
+
+    document.getElementById('dateStatement').innerHTML = `${weekRange.startOfWeekISO.slice(0, 10)} по ${weekRange.endOfWeekISO.slice(0, 10)}`;   
+}
+
+launchStatic();
+
 function loadClasses() {
-    const token = localStorage.getItem('jwtToken');  // Убедитесь, что вы правильно передаете токен
-    fetch('https://okr.yzserver.ru/api/Schedule', {
+    const token = localStorage.getItem('jwtToken');
+    fetch('https://okr.yzserver.ru/api/Schedule?DateFrom=2025-03-20T14%3A45%3A08.123Z&DateTo=2025-03-28T14%3A45%3A08.123Z', {
         method: 'GET',
         headers: {
             accept: '*/*',
@@ -187,13 +208,17 @@ function loadClasses() {
     .then(response => {
         if (response.ok) {
             console.log("Запрос на расписание прошел успешно.");
-            return response.json();  // Парсим ответ как JSON
+            return response.json();
         } else {
             console.warn(`Ошибка при получении данных: ${response.status}`);
         }
     })
     .then(data => {
         console.log("Данные получены:", data);
+
+        data.forEach(element => {
+            console.log(element);
+        });
     })
     .catch(error => {
         console.error("Ошибка при запросе:", error);

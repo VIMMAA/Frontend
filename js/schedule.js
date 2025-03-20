@@ -1,7 +1,7 @@
-const actualDate = new Date().toISOString();
 let month = new Date().getMonth();
 let year = new Date().getFullYear();
 let selectedClasses = [];
+let flag = true;
 launchStatic();
 eventClickers(month);
 generateCalendar(year, month);
@@ -137,45 +137,45 @@ function updateCells() {
     });
 }
 
-// document.addEventListener('DOMContentLoaded', () => {
-//     const fileInput = document.getElementById('fileInput');
-//     const fileList = document.getElementById('fileList');
+document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
 
-//     const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'txt', 'pdf', 'doc', 'docx'];
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
 
-//     fileInput.addEventListener('change', () => {
-//         const files = fileInput.files;
+    fileInput.addEventListener('change', () => {
+        const files = fileInput.files;
 
-//         if (files.length === 0) return;
+        if (files.length === 0) return;
 
-//         for (let i = 0; i < files.length; i++) {
-//             const file = files[i];
-//             const fileExtension = file.name.split('.').pop().toLowerCase();
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const fileExtension = file.name.split('.').pop().toLowerCase();
 
-//             if (!allowedExtensions.includes(fileExtension)) {
-//                 alert(`Файл "${file.name}" имеет недопустимый формат!`);
-//                 continue;
-//             }
+            if (!allowedExtensions.includes(fileExtension)) {
+                alert(`Файл "${file.name}" имеет недопустимый формат!`);
+                continue;
+            }
 
-//             const li = document.createElement('li');
-//             li.className = 'list-group-item d-flex justify-content-between align-items-center bg-secondary text-white';
-//             li.innerHTML = `
-//                 <span>${file.name}</span>
-//                 <button class="btn btn-danger btn-sm delete-file">Удалить</button>
-//             `;
-//             fileList.appendChild(li);
-//         }
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center bg-secondary text-white';
+            li.innerHTML = `
+                <span>${file.name}</span>
+                <button class="btn btn-danger btn-sm delete-file">Удалить</button>
+            `;
+            fileList.appendChild(li);
+        }
 
-//         fileInput.value = '';
-//     });
+        fileInput.value = '';
+    });
 
-//     fileList.addEventListener('click', (event) => {
-//         if (event.target.classList.contains('delete-file')) {
-//             const li = event.target.closest('li');
-//             fileList.removeChild(li);
-//         }
-//     });
-// });
+    fileList.addEventListener('click', (event) => {
+        if (event.target.classList.contains('delete-file')) {
+            const li = event.target.closest('li');
+            fileList.removeChild(li);
+        }
+    });
+});
 
 //часть кода где будут запросы к бэку
 
@@ -206,6 +206,7 @@ function getDatesForWeek(startDate) {
 }
 
 function launchStatic() {
+    //добавить потом флаг чтоб брало время сегодняшнего момента только в первый раз
     const weekRange = getWeekRange(new Date());
     const weekDates = getDatesForWeek(weekRange.startOfWeek);
 
@@ -222,14 +223,58 @@ function launchStatic() {
 
         headers[i + 1].innerHTML = `${headers[i + 1].innerHTML.split('<br>')[0]}<br>${formattedDate}`;
     }
+    console.log(weekDates);//беру
+    console.log(weekRange);
+    setTimeInCells(weekDates);
 
+    loadClasses();
+}
 
-    //loadClasses();
+function setTimeInCells(weekDates) {
+    let arrayCells = document.querySelectorAll("td");
+
+    let emptyCells = Array.from(arrayCells).filter(cell => cell.textContent.trim() === "");
+
+    const timeStarters = [
+        "08:45:00Z",
+        "10:35:00Z",
+        "11:25:00Z",
+        "14:45:00Z",
+        "16:35:00Z",
+        "18:25:00Z",
+        "20:15:00Z",
+    ]
+
+    console.log(emptyCells.length);
+    for (let i = 0; i < emptyCells.length; i++) {
+        // Получаем дату для текущего дня (предполагаем, что weekDates[0] — это понедельник)
+        let currentDate = new Date(weekDates[i % 7]); // копируем дату с начала недели
+    
+        // Добавляем дни недели для вычисления конкретной даты
+        currentDate.setDate(currentDate.getDate());  // i - это индекс дня недели
+    
+        // Форматируем данные в нужный ISO формат
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1; // добавляем 1, потому что getMonth() возвращает от 0 до 11
+        const day = currentDate.getDate();
+        
+        // Время начала для каждой пары
+        const timeStarter = timeStarters[i % 7]; // допустим, timeStarters[i] — это время начала в формате "HH:MM"
+        
+        // Формируем строку времени для data-time (в ISO формате)
+        const isoDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${timeStarter}`;
+    
+        // Устанавливаем атрибут data-time
+        emptyCells[i].setAttribute('data-time', isoDate);
+    }
+    
 }
 
 function loadClasses() {
     const token = localStorage.getItem('jwtToken');
-    fetch('https://okr.yzserver.ru/api/Schedule?DateFrom=2025-01-20T14%3A45%3A08.123Z&DateTo=2025-03-28T14%3A45%3A08.123Z', {
+    const classes = [];
+    //нужно ограничить количество пар в запросе, добавлять их в какой-то массив
+    fetch('https://okr.yzserver.ru/api/Schedule?DateFrom=2025-01-20T14%3A45%3A08.123Z&DateTo=2025-01-28T14%3A45%3A08.123Z', {
         method: 'GET',
         headers: {
             accept: '*/*',
@@ -246,10 +291,6 @@ function loadClasses() {
     })
     .then(data => {
         console.log("Данные получены:", data);
-
-        data.forEach(element => {
-            console.log(element);
-        });
     })
     .catch(error => {
         console.error("Ошибка при запросе:", error);

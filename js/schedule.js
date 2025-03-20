@@ -205,7 +205,7 @@ function getDatesForWeek(startDate) {
     return weekDates;
 }
 
-function launchStatic() {
+async function launchStatic() {
     //добавить потом флаг чтоб брало время сегодняшнего момента только в первый раз
     const weekRange = getWeekRange(new Date());
     const weekDates = getDatesForWeek(weekRange.startOfWeek);
@@ -225,7 +225,7 @@ function launchStatic() {
     }
     console.log(weekDates);//беру
     console.log(weekRange);
-    setTimeInCells(weekDates);
+    await setTimeInCells(weekDates);
 
     loadClasses();
 }
@@ -238,7 +238,7 @@ function setTimeInCells(weekDates) {
     const timeStarters = [
         "08:45:00Z",
         "10:35:00Z",
-        "11:25:00Z",
+        "12:25:00Z",
         "14:45:00Z",
         "16:35:00Z",
         "18:25:00Z",
@@ -246,26 +246,27 @@ function setTimeInCells(weekDates) {
     ]
 
     console.log(emptyCells.length);
+    let j = -1;
     for (let i = 0; i < emptyCells.length; i++) {
-        // Получаем дату для текущего дня (предполагаем, что weekDates[0] — это понедельник)
-        let currentDate = new Date(weekDates[i % 7]); // копируем дату с начала недели
+        if (i % 7 == 0) {
+            j++;
+        }
+        let currentDate = new Date(weekDates[i % 7]); // копируем дату с начала недели+
     
-        // Добавляем дни недели для вычисления конкретной даты
-        currentDate.setDate(currentDate.getDate());  // i - это индекс дня недели
+        currentDate.setDate(currentDate.getDate());  // i - это индекс дня недели+
     
-        // Форматируем данные в нужный ISO формат
         const year = currentDate.getFullYear();
-        const month = currentDate.getMonth() + 1; // добавляем 1, потому что getMonth() возвращает от 0 до 11
+        const month = currentDate.getMonth() + 1;
         const day = currentDate.getDate();
         
-        // Время начала для каждой пары
-        const timeStarter = timeStarters[i % 7]; // допустим, timeStarters[i] — это время начала в формате "HH:MM"
-        
-        // Формируем строку времени для data-time (в ISO формате)
+        const timeStarter = timeStarters[j];
+        console.log(j);
         const isoDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${timeStarter}`;
-    
-        // Устанавливаем атрибут data-time
-        emptyCells[i].setAttribute('data-time', isoDate);
+        
+        if (i % 7 !== 6) {
+            emptyCells[i].setAttribute('data-time', isoDate);
+        }
+        
     }
     
 }
@@ -274,7 +275,7 @@ function loadClasses() {
     const token = localStorage.getItem('jwtToken');
     const classes = [];
     //нужно ограничить количество пар в запросе, добавлять их в какой-то массив
-    fetch('https://okr.yzserver.ru/api/Schedule?DateFrom=2025-01-20T14%3A45%3A08.123Z&DateTo=2025-01-28T14%3A45%3A08.123Z', {
+    fetch('https://okr.yzserver.ru/api/Schedule?DateFrom=2025-03-17T00:00:00Z&DateTo=2025-03-28T00:00:00Z', {
         method: 'GET',
         headers: {
             accept: '*/*',
@@ -290,7 +291,29 @@ function loadClasses() {
         }
     })
     .then(data => {
-        console.log("Данные получены:", data);
+        console.log("Данные получены:");
+        let arrayCells = document.querySelectorAll("td");
+        let emptyCells = Array.from(arrayCells).filter(cell => cell.textContent.trim() === "");
+
+        data.forEach(day => {
+            let dayClass = {
+                endTime: day.endTime,
+                id: day.id,
+                name: day.name,
+                startTime: day.startTime
+            };
+            console.log(dayClass);
+
+            //нужно найти в emptyCells date-time которая равна startTime
+
+            emptyCells.forEach(cell => {
+                if (cell.getAttribute('data-time') === dayClass.startTime) {
+                    cell.setAttribute('data-id', dayClass.id);
+                    cell.textContent = dayClass.name;
+                }
+            });
+    
+        });
     })
     .catch(error => {
         console.error("Ошибка при запросе:", error);

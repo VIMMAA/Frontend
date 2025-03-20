@@ -1,11 +1,102 @@
+const actualDate = new Date().toISOString();
+let month = new Date().getMonth();
+let year = new Date().getFullYear();
 launchStatic();
+eventClickers(month);
+generateCalendar(year, month);
+
+function eventClickers(month) {
+    let changeStatement = document.querySelector('#statement');
+    let dateStatement = document.querySelector("#dateStatement");
+    let scheduleStatement = document.querySelectorAll('table');
+    
+    let next = document.querySelector("#next");
+    let previous = document.querySelector("#previous");
+    
+    changeStatement.addEventListener('click', () => {
+        scheduleStatement.forEach(statement => {
+            if (!statement.classList.contains('d-none') && statement.id === "classesTable") {
+                statement.classList.toggle('d-none');
+                next.innerHTML = "Следующий месяц &rarr;";
+                previous.innerHTML = "&larr; Предыдущий месяц"; 
+                dateStatement.textContent = `${month + 1} месяц`;
+                changeStatement.textContent = "Открыть расписание";
+            } else {
+                statement.classList.toggle('d-none');
+                next.innerHTML = "Следующая неделя &rarr;";
+                previous.innerHTML = "&larr; Предыдущая неделя";
+                dateStatement.textContent = `03.03.2025 - 08.03.2025`;//пофиксить так чтоб актуальная дата была
+                changeStatement.textContent = "Открыть календарь";
+            }
+        });
+    
+        //updateCells();
+    });
+    
+    next.addEventListener("click", () => {
+        if (changeStatement.textContent == "Открыть расписание") {
+            month = (month + 1) % 12;
+            dateStatement.textContent = `${month + 1} месяц`;
+            generateCalendar(2025, month);
+            //updateCells();
+        }
+    });
+    
+    previous.addEventListener("click", () => {
+        if (changeStatement.textContent == "Открыть расписание") {
+            month = (month - 1 + 12) % 12;
+            dateStatement.textContent = `${month + 1} месяц`;
+            generateCalendar(2025, month);   
+            //updateCells();
+        }
+    });
+}
+
+function generateCalendar(year, month) {
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const calendarBody = document.getElementById('calendarBody');
+    calendarBody.innerHTML = '';
+
+    let date = 1;
+    for (let i = 0; i < 6; i++) { 
+        let row = document.createElement('tr');
+        
+        for (let j = 0; j < 7; j++) {
+            let cell = document.createElement('td');
+            let cellId = `${year}-${month + 1}-${date}`; 
+
+            if (i === 0 && j < (firstDay === 0 ? 6 : firstDay - 1)) {
+                cell.innerHTML = '';
+            } else if (date > daysInMonth) {
+                cell.innerHTML = '';
+            } else {
+                cell.innerHTML = date;
+                date++;
+            }
+
+            cell.setAttribute('data-id', cellId);
+            cell.addEventListener('click', handleClassClick);
+
+            if (selectedClasses.includes(cellId)) {
+                cell.classList.add('selected');
+            }
+
+
+            row.appendChild(cell);
+        }
+        
+        calendarBody.appendChild(row);
+        
+        if (date > daysInMonth) {
+            break;
+        }
+    }
+}
 
 // let selectedDays = [];  // Для выделения дней в календаре
 // let selectedClasses = [];  // Для выделения пар в расписании
-// let scheduleStatement = document.querySelectorAll('table');
-// let changeStatement = document.querySelector('#statement');
-// let next = document.querySelector("#next");
-// let previous = document.querySelector("#previous");
+
 // let month = 2;
 
 // function updateCells() {
@@ -50,45 +141,6 @@ launchStatic();
 //     }
 // }
 
-// changeStatement.addEventListener('click', () => {
-//     let dateStatement = document.querySelector("#dateStatement");
-//     scheduleStatement.forEach(statement => {
-//         if (!statement.classList.contains('d-none') && statement.id === "classesTable") {
-//             statement.classList.toggle('d-none');
-//             next.innerHTML = "Следующий месяц &rarr;";
-//             previous.innerHTML = "&larr; Предыдущий месяц"; 
-//             dateStatement.textContent = `${month + 1} месяц`;
-//             changeStatement.textContent = "Открыть расписание";
-//         } else {
-//             statement.classList.toggle('d-none');
-//             next.innerHTML = "Следующая неделя &rarr;";
-//             previous.innerHTML = "&larr; Предыдущая неделя";
-//             dateStatement.textContent = `03.03.2025 - 08.03.2025`;
-//             changeStatement.textContent = "Открыть календарь";
-//         }
-//     });
-
-//     updateCells();
-// });
-
-// next.addEventListener("click", () => {
-//     if (changeStatement.textContent == "Открыть расписание") {
-//         month = (month + 1) % 12;
-//         dateStatement.textContent = `${month + 1} месяц`;
-//         generateCalendar(2025, month);
-//         updateCells();
-//     }
-// });
-
-// previous.addEventListener("click", () => {
-//     if (changeStatement.textContent == "Открыть расписание") {
-//         month = (month - 1 + 12) % 12;
-//         dateStatement.textContent = `${month + 1} месяц`;
-//         generateCalendar(2025, month);   
-//         updateCells();
-//     }
-// });
-
 // document.addEventListener('DOMContentLoaded', () => {
 //     const fileInput = document.getElementById('fileInput');
 //     const fileList = document.getElementById('fileList');
@@ -129,47 +181,6 @@ launchStatic();
 //     });
 // });
 
-// function generateCalendar(year, month) {
-//     const firstDay = new Date(year, month, 1).getDay();
-//     const daysInMonth = new Date(year, month + 1, 0).getDate();
-//     const calendarBody = document.getElementById('calendarBody');
-//     calendarBody.innerHTML = '';
-
-//     let date = 1;
-//     for (let i = 0; i < 6; i++) { 
-//         let row = document.createElement('tr');
-        
-//         for (let j = 0; j < 7; j++) {
-//             let cell = document.createElement('td');
-//             let cellId = `${year}-${month + 1}-${date}`; 
-
-//             if (i === 0 && j < (firstDay === 0 ? 6 : firstDay - 1)) {
-//                 cell.innerHTML = '';
-//             } else if (date > daysInMonth) {
-//                 cell.innerHTML = '';
-//             } else {
-//                 cell.innerHTML = date;
-//                 date++;
-//             }
-
-//             cell.setAttribute('data-id', cellId);
-//             cell.addEventListener('click', handleClassClick);
-
-//             if (selectedClasses.includes(cellId)) {
-//                 cell.classList.add('selected');
-//             }
-
-
-//             row.appendChild(cell);
-//         }
-        
-//         calendarBody.appendChild(row);
-        
-//         if (date > daysInMonth) {
-//             break;
-//         }
-//     }
-// }
 
 // generateCalendar(2025, 2);
 // updateCells();

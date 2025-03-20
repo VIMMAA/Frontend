@@ -1,3 +1,5 @@
+launchStatic();
+
 // let selectedDays = [];  // Для выделения дней в календаре
 // let selectedClasses = [];  // Для выделения пар в расписании
 // let scheduleStatement = document.querySelectorAll('table');
@@ -184,21 +186,47 @@ function getWeekRange(date) {
     const startOfWeekISO = startOfWeek.toISOString();
     const endOfWeekISO = endOfWeek.toISOString();
 
-    return { startOfWeekISO, endOfWeekISO };
+    return { startOfWeekISO, endOfWeekISO, startOfWeek, endOfWeek };
+}
+
+function getDatesForWeek(startDate) {
+    const weekDates = [];
+    let currentDay = new Date(startDate);
+
+    for (let i = 0; i < 7; i++) {
+        let date = new Date(currentDay);
+        date.setDate(currentDay.getDate() + i);
+        weekDates.push(date);
+    }
+
+    return weekDates;
 }
 
 function launchStatic() {
     const weekRange = getWeekRange(new Date());
-    console.log('Актуальная неделя:', weekRange.startOfWeekISO, 'по', weekRange.endOfWeekISO);
+    const weekDates = getDatesForWeek(weekRange.startOfWeek);
 
-    document.getElementById('dateStatement').innerHTML = `${weekRange.startOfWeekISO.slice(0, 10)} по ${weekRange.endOfWeekISO.slice(0, 10)}`;   
+    document.getElementById('dateStatement').innerHTML = `${weekRange.startOfWeekISO.slice(0, 10)} по ${weekRange.endOfWeekISO.slice(0, 10)}`;
+    
+    const dayNames = document.querySelectorAll('.classes-list tr th');
+    const headers = Array.from(dayNames);
+
+    for (let i = 0; i < 7; i++) {
+        const formattedDate = weekDates[i].toLocaleDateString('ru-RU', {
+            month: 'long',
+            day: 'numeric'
+        });
+
+        headers[i + 1].innerHTML = `${headers[i + 1].innerHTML.split('<br>')[0]}<br>${formattedDate}`;
+    }
+
+
+    //loadClasses();
 }
-
-launchStatic();
 
 function loadClasses() {
     const token = localStorage.getItem('jwtToken');
-    fetch('https://okr.yzserver.ru/api/Schedule?DateFrom=2025-03-20T14%3A45%3A08.123Z&DateTo=2025-03-28T14%3A45%3A08.123Z', {
+    fetch('https://okr.yzserver.ru/api/Schedule?DateFrom=2025-01-20T14%3A45%3A08.123Z&DateTo=2025-03-28T14%3A45%3A08.123Z', {
         method: 'GET',
         headers: {
             accept: '*/*',
@@ -224,5 +252,3 @@ function loadClasses() {
         console.error("Ошибка при запросе:", error);
     });
 }
-
-loadClasses();

@@ -280,7 +280,7 @@ if (token && userEmail && userRole === "Student") {
 }
     
 createAppliacationButton.addEventListener('click' , () => {
-    window.location.href = 'index.html'; //добавьть переход на страницу создания заявки
+    window.location.href = 'schedule.html'; //добавьть переход на страницу создания заявки
 })
 
 

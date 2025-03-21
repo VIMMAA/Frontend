@@ -1,3 +1,32 @@
+//if (/*какое то условие чтоб делать не POST а PUT*/) {
+    
+//}
+//редактирование
+const putSkip = localStorage.getItem("PUTSKIP");
+const applicationHeader = document.querySelector('.application-header');
+if (putSkip != null) {
+    applicationHeader.textContent = "Редактирование заявки";
+} else {
+    applicationHeader.textContent = "Создание заявки"
+}
+
+async function putApplication(data) {
+    const token = localStorage.getItem('jwtToken');
+
+    console.log('Отправка данных на сервер...');
+    console.log('Данные:', data);
+
+    return fetch(`https://okr.yzserver.ru/api/Application?${localStorage.getItem("PUTSKIP")}`, {
+        method: 'PUT',
+        headers: {
+            'accept': '*/*',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data)
+    });
+}
+
 let month = new Date().getMonth();
 let year = new Date().getFullYear();
 let selectedClasses = [];

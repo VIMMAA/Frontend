@@ -101,7 +101,8 @@ function renderApplications(app) {
             const newEditButton = applicationClone.querySelector(".editApplication");
 
             newEditButton.addEventListener("click", () => {
-                window.location.href = `index.html?id=${app.id}`; // переход на страницу редактирования
+                window.location.href = `schedule.html?id=${app.id}`; // переход на страницу редактирования
+                localStorage.setItem('PUTSKIP', app.id);
             });
 
             reviewApplication.classList.remove("d-none");
@@ -138,7 +139,7 @@ function renderApplications(app) {
     }
 
     applicationNum.addEventListener('click', () => {
-        window.location.href= `index.html?id=${app.id}`; //добавишь переход на страницу с информацией о заявке
+        window.location.href= `schedule.html?id=${app.id}`; //добавишь переход на страницу с информацией о заявке
     })
 
     applicationContainer.appendChild(applicationClone);

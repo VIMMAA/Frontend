@@ -3,11 +3,51 @@
 //}
 //редактирование
 const putSkip = localStorage.getItem("PUTSKIP");
+const putApplicationButton = document.querySelector('#submitApplication');
+let buttonText = "";
 const applicationHeader = document.querySelector('.application-header');
+
+let month = new Date().getMonth();
+let year = new Date().getFullYear();
+let selectedClasses = [];
+let flagDay = new Date();
+
 if (putSkip != null) {
+    const token = localStorage.getItem('jwtToken');
+    buttonText = "Редактировать заявку";
     applicationHeader.textContent = "Редактирование заявки";
+    putApplicationButton.textContent = buttonText;//нужен гет запрос на имеющиеся данные
+
+    fetch(`https://okr.yzserver.ru/api/Application/${putSkip}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    })
+    .then(response => {
+
+        return response.json();
+    })
+    .then(data => {
+        console.log("Ответ API:", data);
+
+        data.lessons.forEach(lesson => {
+            selectedClasses.push(lesson.id);
+        });
+        //
+        console.log("selectedClasses", selectedClasses);
+        updateCells();
+    })
+    .catch(error => {
+        console.error('Не удалось загрузить заявки:', error);
+        alert('Произошла ошибка при загрузке заявок');
+    });
+
 } else {
+    buttonText = "Создать заявку";
     applicationHeader.textContent = "Создание заявки"
+    putApplicationButton.textContent = buttonText;
 }
 
 async function putApplication(data) {
@@ -27,10 +67,6 @@ async function putApplication(data) {
     });
 }
 
-let month = new Date().getMonth();
-let year = new Date().getFullYear();
-let selectedClasses = [];
-let flagDay = new Date();
 launchStatic();
 eventClickers(month);
 updateCells();
@@ -141,7 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitApplicationButton = document.getElementById('submitApplication');
     if (submitApplicationButton) {
         submitApplicationButton.addEventListener('click', async () => {
-            // Блокируем кнопку
             submitApplicationButton.disabled = true;
             submitApplicationButton.textContent = 'Отправка...';
 
@@ -149,8 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (files.length === 0) {
                 alert('Пожалуйста, загрузите хотя бы один файл.');
-                submitApplicationButton.disabled = false; // Разблокируем кнопку
-                submitApplicationButton.textContent = 'Отправить заявку';
+                submitApplicationButton.disabled = false;
+                submitApplicationButton.textContent = buttonText;
                 return;
             }
 
@@ -173,8 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (error) {
                     console.error(`Ошибка при чтении файла "${file.name}":`, error);
                     alert(`Ошибка при чтении файла ${file.name}.`);
-                    submitApplicationButton.disabled = false; // Разблокируем кнопку
-                    submitApplicationButton.textContent = 'Отправить заявку';
+                    submitApplicationButton.disabled = false;
+                    submitApplicationButton.textContent = buttonText;
                     return;
                 }
             }
@@ -183,12 +218,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (applicationData.files.length === 0) {
                 console.error('Файлы не были добавлены в applicationData.files.');
                 alert('Ошибка: файлы не были обработаны.');
-                submitApplicationButton.disabled = false; // Разблокируем кнопку
-                submitApplicationButton.textContent = 'Отправить заявку';
+                submitApplicationButton.disabled = false;
+                submitApplicationButton.textContent = buttonText;
                 return;
             }
 
-            // Отправка заявки
             try {
                 const response = await submitApplication(applicationData);
                 if (response.ok) {
@@ -207,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 // Разблокируем кнопку после завершения запроса
                 submitApplicationButton.disabled = false;
-                submitApplicationButton.textContent = 'Отправить заявку';
+                submitApplicationButton.textContent = buttonText;
             }
         });
     }

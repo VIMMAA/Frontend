@@ -1,7 +1,4 @@
-//if (/*какое то условие чтоб делать не POST а PUT*/) {
-    
-//}
-//редактирование
+const getSkip = localStorage.getItem("GETSKIP");
 const putSkip = localStorage.getItem("PUTSKIP");
 const putApplicationButton = document.querySelector('#submitApplication');
 let buttonText = "";
@@ -79,7 +76,72 @@ if (putSkip != null) {
         });
     });
 
-} else {
+} else if (getSkip != null) {
+    const token = localStorage.getItem('jwtToken');
+    document.querySelector('#submitApplication').classList.add('d-none');
+    buttonText = "Просмотреть заявку";
+    applicationHeader.textContent = "Просмотр заявки";
+    uploadForm.classList.add('d-none');
+    //putApplicationButton.textContent = buttonText;//нужен гет запрос на имеющиеся данные
+
+    fetch(`https://okr.yzserver.ru/api/Application/${getSkip}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    })
+    .then(response => {
+
+        return response.json();
+    })
+    .then(data => {
+        //console.log("Ответ API:", data);
+
+        data.lessons.forEach(lesson => {
+            selectedClasses.push(lesson.id);
+        });
+        
+        data.attachedFiles.forEach(attached => {
+            filePic.push({
+                name: attached.name,
+                data: attached.data
+            });
+
+            console.log("filePic", filePic);
+        });
+
+        console.log("selectedClasses", selectedClasses);
+        updateCells();
+    })
+    .catch(error => {
+        console.error('Не удалось загрузить заявки:', error);
+        alert('Произошла ошибка при загрузке заявок');
+    });
+
+    document.getElementById('downloadFilesButton').addEventListener('click', function() {
+        if (filePic.length === 0) {
+            alert('Нет файлов для скачивания');
+            return;
+        }
+    
+        filePic.forEach(file => {
+            const link = document.createElement('a');
+            
+            const blob = base64ToBlob(file.data);
+            
+            const url = URL.createObjectURL(blob);
+            
+            link.href = url;
+            link.download = file.name;
+            
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        });
+    });
+} 
+else {
     buttonText = "Создать заявку";
     applicationHeader.textContent = "Создание заявки"
     putApplicationButton.textContent = buttonText;

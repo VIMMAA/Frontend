@@ -64,4 +64,5 @@ if (window.location.href.includes("schedule.html")) {
     updateNavbar();
 } else {
     localStorage.removeItem("PUTSKIP");
+    localStorage.removeItem("GETSKIP");
 }

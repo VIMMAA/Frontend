@@ -139,7 +139,8 @@ function renderApplications(app) {
     }
 
     applicationNum.addEventListener('click', () => {
-        window.location.href= `schedule.html?id=${app.id}`; //добавишь переход на страницу с информацией о заявке
+        window.location.href= `schedule.html?id=${app.id}`;
+        localStorage.setItem('GETSKIP', app.id);
     })
 
     applicationContainer.appendChild(applicationClone);

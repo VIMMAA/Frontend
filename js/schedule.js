@@ -6,16 +6,20 @@ const putSkip = localStorage.getItem("PUTSKIP");
 const putApplicationButton = document.querySelector('#submitApplication');
 let buttonText = "";
 const applicationHeader = document.querySelector('.application-header');
+const downloadFilesButton = document.querySelector('#downloadFilesButton');
+const uploadForm = document.querySelector('.form-control');//для пута невидим
 
 let month = new Date().getMonth();
 let year = new Date().getFullYear();
 let selectedClasses = [];
+let filePic = [];
 let flagDay = new Date();
 
 if (putSkip != null) {
     const token = localStorage.getItem('jwtToken');
     buttonText = "Редактировать заявку";
     applicationHeader.textContent = "Редактирование заявки";
+    uploadForm.classList.add('d-none');
     putApplicationButton.textContent = buttonText;//нужен гет запрос на имеющиеся данные
 
     fetch(`https://okr.yzserver.ru/api/Application/${putSkip}`, {
@@ -35,7 +39,16 @@ if (putSkip != null) {
         data.lessons.forEach(lesson => {
             selectedClasses.push(lesson.id);
         });
-        //
+        
+        data.attachedFiles.forEach(attached => {
+            filePic.push({
+                name: attached.name,
+                data: attached.data
+            });
+
+            console.log("filePic", filePic);
+        });
+
         console.log("selectedClasses", selectedClasses);
         updateCells();
     })
@@ -44,10 +57,33 @@ if (putSkip != null) {
         alert('Произошла ошибка при загрузке заявок');
     });
 
+    document.getElementById('downloadFilesButton').addEventListener('click', function() {
+        if (filePic.length === 0) {
+            alert('Нет файлов для скачивания');
+            return;
+        }
+    
+        filePic.forEach(file => {
+            const link = document.createElement('a');
+            
+            const blob = base64ToBlob(file.data);
+            
+            const url = URL.createObjectURL(blob);
+            
+            link.href = url;
+            link.download = file.name;
+            
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        });
+    });
+
 } else {
     buttonText = "Создать заявку";
     applicationHeader.textContent = "Создание заявки"
     putApplicationButton.textContent = buttonText;
+    downloadFilesButton.classList.add('d-none');
 }
 
 async function putApplication(data) {
@@ -171,81 +207,87 @@ function updateCells() {
     });
 }
 
-let applicationData = { files: [] }; // Глобальная переменная
+let applicationData = { files: [] };
 
-document.addEventListener('DOMContentLoaded', () => {
-    const submitApplicationButton = document.getElementById('submitApplication');
-    if (submitApplicationButton) {
-        submitApplicationButton.addEventListener('click', async () => {
-            submitApplicationButton.disabled = true;
-            submitApplicationButton.textContent = 'Отправка...';
+if (putSkip) {
 
-            const files = document.getElementById('fileInput').files;
-
-            if (files.length === 0) {
-                alert('Пожалуйста, загрузите хотя бы один файл.');
-                submitApplicationButton.disabled = false;
-                submitApplicationButton.textContent = buttonText;
-                return;
-            }
-
-            const applicationData = {
-                lessons: selectedClasses,
-                files: []
-            };
-
-            console.log('Начало обработки файлов...');
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                console.log(`Обработка файла: ${file.name}`);
-                try {
-                    const base64Data = await fileToBase64(file);
-                    console.log(`Файл "${file.name}" успешно преобразован в base64.`);
-                    applicationData.files.push({
-                        name: file.name,
-                        data: base64Data
-                    });
-                } catch (error) {
-                    console.error(`Ошибка при чтении файла "${file.name}":`, error);
-                    alert(`Ошибка при чтении файла ${file.name}.`);
+} else {
+    document.addEventListener('DOMContentLoaded', () => {
+        const submitApplicationButton = document.getElementById('submitApplication');
+        if (submitApplicationButton) {
+            submitApplicationButton.addEventListener('click', async () => {
+                submitApplicationButton.disabled = true;
+                submitApplicationButton.textContent = 'Отправка...';
+    
+                const files = document.getElementById('fileInput').files;
+    
+                if (files.length === 0) {
+                    alert('Пожалуйста, загрузите хотя бы один файл.');
                     submitApplicationButton.disabled = false;
                     submitApplicationButton.textContent = buttonText;
                     return;
                 }
-            }
-
-            console.log('Данные заявки:', applicationData);
-            if (applicationData.files.length === 0) {
-                console.error('Файлы не были добавлены в applicationData.files.');
-                alert('Ошибка: файлы не были обработаны.');
-                submitApplicationButton.disabled = false;
-                submitApplicationButton.textContent = buttonText;
-                return;
-            }
-
-            try {
-                const response = await submitApplication(applicationData);
-                if (response.ok) {
-                    console.log('Заявка успешно отправлена.');
-                    alert('Заявка успешно отправлена!');
-                    // Перенаправляем пользователя на страницу заявок
-                    window.location.href = 'applicationsList.html'; // Замените на нужный URL
-                } else {
-                    const errorData = await response.json();
-                    console.error('Ошибка при отправке заявки:', errorData);
-                    alert(`Ошибка при отправке заявки: ${errorData.message || 'Неизвестная ошибка'}`);
+    
+                const applicationData = {
+                    lessons: selectedClasses,
+                    files: []
+                };
+    
+                console.log('Начало обработки файлов...');
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    console.log(`Обработка файла: ${file.name}`);
+                    try {
+                        const base64Data = await fileToBase64(file);
+                        console.log(`Файл "${file.name}" успешно преобразован в base64.`);
+                        applicationData.files.push({
+                            name: file.name,
+                            data: base64Data
+                        });
+                    } catch (error) {
+                        console.error(`Ошибка при чтении файла "${file.name}":`, error);
+                        alert(`Ошибка при чтении файла ${file.name}.`);
+                        submitApplicationButton.disabled = false;
+                        submitApplicationButton.textContent = buttonText;
+                        return;
+                    }
                 }
-            } catch (error) {
-                console.error('Ошибка при отправке заявки:', error);
-                alert('Ошибка при отправке заявки.');
-            } finally {
-                // Разблокируем кнопку после завершения запроса
-                submitApplicationButton.disabled = false;
-                submitApplicationButton.textContent = buttonText;
-            }
-        });
-    }
-});
+    
+                console.log('Данные заявки:', applicationData);
+                if (applicationData.files.length === 0) {
+                    console.error('Файлы не были добавлены в applicationData.files.');
+                    alert('Ошибка: файлы не были обработаны.');
+                    submitApplicationButton.disabled = false;
+                    submitApplicationButton.textContent = buttonText;
+                    return;
+                }
+    
+                try {
+                    const response = await submitApplication(applicationData);
+                    if (response.ok) {
+                        console.log('Заявка успешно отправлена.');
+                        alert('Заявка успешно отправлена!');
+                        // Перенаправляем пользователя на страницу заявок
+                        window.location.href = 'applicationsList.html'; // Замените на нужный URL
+                    } else {
+                        const errorData = await response.json();
+                        console.error('Ошибка при отправке заявки:', errorData);
+                        alert(`Ошибка при отправке заявки: ${errorData.message || 'Неизвестная ошибка'}`);
+                    }
+                } catch (error) {
+                    console.error('Ошибка при отправке заявки:', error);
+                    alert('Ошибка при отправке заявки.');
+                } finally {
+                    // Разблокируем кнопку после завершения запроса
+                    submitApplicationButton.disabled = false;
+                    submitApplicationButton.textContent = buttonText;
+                }
+            });
+        }
+    });
+}
+
+
 async function submitApplication(data) {
     const token = localStorage.getItem('jwtToken');
 
@@ -464,3 +506,23 @@ function updateFileList() {
         fileList.appendChild(li);
     });
 }
+
+function base64ToBlob(base64) {
+    const byteCharacters = atob(base64); // Декодируем строку base64
+    const byteArrays = [];
+    
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+        const slice = byteCharacters.slice(offset, offset + 1024);
+        const byteNumbers = new Array(slice.length);
+        
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+        
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    return new Blob(byteArrays, { type: 'application/octet-stream' });
+}
+

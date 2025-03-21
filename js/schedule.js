@@ -217,6 +217,7 @@ function eventClickers(month) {
 
     next.addEventListener("click", () => {
         if (changeStatement.textContent == "Открыть календарь") {
+            uncolorCells()
             launchStatic(1);
             updateCells();
         }
@@ -224,9 +225,18 @@ function eventClickers(month) {
     
     previous.addEventListener("click", () => {
         if (changeStatement.textContent == "Открыть календарь") {
+            uncolorCells()
             launchStatic(-1);
             updateCells();
         }
+    });
+}
+
+function uncolorCells() {
+    let cellColors = document.querySelectorAll('.selected');
+
+    cellColors.forEach(cell => {
+        cell.removeAttribute('data-id');
     });
 }
 

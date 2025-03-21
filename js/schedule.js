@@ -416,14 +416,19 @@ function getWeekRange(date) {
     const currentDate = new Date(date);
     const dayOfWeek = currentDate.getDay();
     const diffToStartOfWeek = currentDate.getDate() - dayOfWeek + 1;
-    const startOfWeek = new Date(currentDate.setDate(diffToStartOfWeek));
-    const endOfWeek = new Date(currentDate.setDate(diffToStartOfWeek + 6));
-
+    
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(diffToStartOfWeek);
+    
+    const endOfWeek = new Date(currentDate);
+    endOfWeek.setDate(diffToStartOfWeek + 6);
+    
     const startOfWeekISO = startOfWeek.toISOString();
     const endOfWeekISO = endOfWeek.toISOString();
 
     return { startOfWeekISO, endOfWeekISO, startOfWeek, endOfWeek };
 }
+
 
 function getDatesForWeek(startDate) {
     const weekDates = [];

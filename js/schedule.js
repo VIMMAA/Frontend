@@ -92,7 +92,7 @@ async function putApplication(data) {
     console.log('Отправка данных на сервер...');
     console.log('Данные:', data);
 
-    return fetch(`https://okr.yzserver.ru/api/Application?${localStorage.getItem("PUTSKIP")}`, {
+    return fetch(`https://okr.yzserver.ru/api/Application/${localStorage.getItem("PUTSKIP")}`, {
         method: 'PUT',
         headers: {
             'accept': '*/*',
@@ -210,6 +210,38 @@ function updateCells() {
 let applicationData = { files: [] };
 
 if (putSkip) {
+
+    document.getElementById('submitApplication').addEventListener('click', async () => {
+        const submitApplicationButton = document.getElementById('submitApplication');
+        submitApplicationButton.disabled = true;
+        submitApplicationButton.textContent = 'Редактирование...';
+
+        const applicationData = {
+            lessons: selectedClasses,
+            files: filePic
+        };
+
+        console.log('Данные для редактирования:', applicationData);
+
+        try {
+            const response = await putApplication(applicationData);
+            if (response.ok) {
+                console.log('Заявка успешно отредактирована.');
+                alert('Заявка успешно отредактирована!');
+                window.location.href = 'applicationsList.html';
+            } else {
+                const errorData = await response.json();
+                console.error('Ошибка при редактировании заявки:', errorData);
+                alert(`Ошибка при редактировании заявки: ${errorData.message || 'Неизвестная ошибка'}`);
+            }
+        } catch (error) {
+            console.error('Ошибка при редактировании заявки:', error);
+            alert('Ошибка при редактировании заявки.');
+        } finally {
+            submitApplicationButton.disabled = false;
+            submitApplicationButton.textContent = buttonText;
+        }
+    });
 
 } else {
     document.addEventListener('DOMContentLoaded', () => {
